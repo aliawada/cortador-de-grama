@@ -1,181 +1,94 @@
-// Pilha
-var pilha = [];
-
-// How many columns and rows?
 var cols = 7;
 var rows = 7;
-
-// Width and height of each cell of grid
-var w, h;
-
-// This will be the 2D array
-var grid = new Array(cols);
-
-// Starting
-var start;
-
-// Total de formigueiros
-var total_gramas = 0;
-
-function Spot(i, j) {
-  this.i = i;
-  this.j = j;
-
-  // Am I a formigueiro?
-  if (random(1) < 0.1) {
-    this.formigueiro = true;
-  } else {
-    this.grama_cortada = false;
-    total_gramas++;
-  }
-
-  this.show = function (color) {
-    if (this.formigueiro) {
-      fill(222, 184, 135);
-      stroke(0);
-      rect(this.i * w, this.j * h, w - 1, h - 1);
-    } else if (color) {
-      fill(color);
-      rect(this.i * w, this.j * h, w, h);
-    }
-  }
-
-}
+var free;
+var busy;
+var field = new Array(cols);
+var position;
 
 function setup() {
   console.log('Cortador de Grama');
   createCanvas(500, 500);
 
+  free = cols * rows;
+  busy = 0;
+  position = new Array(2);
+  position[0] = position[1] = 0;
+
   // Grid cell size
   w = width / cols;
   h = height / rows;
 
-  // Making a 2D array
+  // Criando a matriz
   for (var i = 0; i < cols; i++) {
-    grid[i] = new Array(rows);
+    field[i] = new Array(rows);
   }
 
   for (var i = 0; i < cols; i++) {
     for (var j = 0; j < rows; j++) {
-      grid[i][j] = new Spot(i, j);
+      if (random(1) < 0.1) {
+        field[i][j] = 2;
+      } else {
+        field[i][j] = 0;
+      }
+      show(i, j);
     }
   }
 
-  // Desenha a matriz
-  for (var i = 0; i < cols; i++) {
-    for (var j = 0; j < rows; j++) {
-      grid[i][j].show(color(0, 255, 0, 50));
-    }
-  }
-
-  start = grid[0][0];
-  start.formigueiro = false;
-  start.grama_cortada = true;
-
-  pilha.push(start);
 }
 
 function draw() {
-
-  var proximo;
-  var lastPosition;
-  var total = 0;
-
-  // Enquanto a grama total não está cortada do..
-  do {
-
-    // Corta a grama
-    for (var i = 0; i < cols; i++) {
-      for (var j = 0; j < rows; j++) {
-
-
-        if (i < cols - 1 && valid(grid[i + 1][j].grama_cortada === false && grid[i + 1][j].formigueiro === false) {
-          proximo = grid[i + 1][j];
-          proximo.grama_cortada = true;
-          grid[i][j].show(color(0, 255, 0));
-          total++;
-          pilha.push(proximo);
-        } else if (i > 0 && grid[i - 1][j].grama_cortada === false && grid[i - 1][j].formigueiro === false) {
-          proximo = grid[i - 1][j];
-          proximo.grama_cortada = true;
-          grid[i][j].show(color(0, 255, 0));
-          total++;
-          pilha.push(proximo);
-        } else if (j < rows - 1 && grid[i][j + 1].grama_cortada === false && grid[i][j + 1].formigueiro === false) {
-          proximo = grid[i][j + 1];
-          proximo.grama_cortada = true;
-          grid[i][j].show(color(0, 255, 0));
-          total++;
-          pilha.push(proximo);
-        } else if (j > 0 && grid[i][j - 1].grama_cortada === false && grid[i][j - 1].formigueiro === false) {
-          proximo = grid[i][j - 1];
-          proximo.grama_cortada = true;
-          grid[i][j].show(color(0, 255, 0));
-          total++;
-          pilha.push(proximo);
-        }
-        // voltar
-        else {
-          lastPosition = pilha.pop();
-          console.log(lastPosition);
-
-          if (lastPosition) {
-            if (lastPosition.i < cols - 1 && grid[lastPosition.i + 1][lastPosition.j].grama_cortada === false && grid[lastPosition.i + 1][lastPosition.j].formigueiro === false) {
-              proximo = grid[lastPosition.i + 1][lastPosition.j];
-              proximo.grama_cortada = true;
-              grid[i][j].show(color(0, 255, 0));
-              total++;
-              pilha.push(proximo);
-            } else if (lastPosition.i > 0 && grid[lastPosition.i - 1][lastPosition.j].grama_cortada === false && grid[lastPosition.i - 1][lastPosition.j].formigueiro === false) {
-              proximo = grid[lastPosition.i - 1][lastPosition.j];
-              proximo.grama_cortada = true;
-              grid[i][j].show(color(0, 255, 0));
-              total++;
-              pilha.push(proximo);
-            } else if (lastPosition.j < rows - 1 && grid[lastPosition.i][lastPosition.j + 1].grama_cortada === false && grid[lastPosition.i][lastPosition.j + 1].formigueiro === false) {
-              proximo = grid[lastPosition.i][lastPosition.j + 1];
-              proximo.grama_cortada = true;
-              grid[i][j].show(color(0, 255, 0));
-              total++;
-              pilha.push(proximo);
-            } else if (lastPosition.j > 0 && grid[lastPosition.i][lastPosition.j - 1].grama_cortada === false && grid[lastPosition.i][lastPosition.j - 1].formigueiro === false) {
-              proximo = grid[lastPosition.i][lastPosition.j - 1];
-              proximo.grama_cortada = true;
-              grid[i][j].show(color(0, 255, 0));
-              total++;
-              pilha.push(proximo);
-            }
-          }
-
-        }
-
-
-        // if (grid[i][j].grama_cortada === true) {
-        //   grid[i][j].show(color(0, 255, 0));
-        // }
-
-      }
-    }
-
-  } while (isGramaCortada(total));
-
-  console.log(total);
-  console.log(total_gramas);
+  while(free >= 0) {
+    move();
+  }
+  
   noLoop();
-
 }
 
-function isGramaCortada(total) {
-  if (total === total_gramas)
-    return true;
-
-  return false;
-}
-
-function validSpot(spot) {
-  if (spot.grama_cortada === false && spot.formigueiro === false) {
-    return true;
+function show(i, j) {
+  if (field[i][j] == 0) { // grama não cortada
+    fill(0, 255, 0, 30);
+  } else if (field[i][j] == 1) { // grama cortada
+    fill(0, 255, 0);
+  } else if (field[i][j] == 2) { // formigueiro
+    fill(222, 184, 135);
   }
 
-  return false;
+  rect(i * w, j * h, w, h);
+}
+
+function move() {
+  var x = position[0];
+  var y = position[1];
+
+  if (x < rows - 1 && field[x + 1][y] == 0) {
+    position[0] = x + 1;
+    position[1] = y;
+  } else if (y < cols - 1 && field[x][y + 1] == 0) {
+    position[0] = x;
+    position[1] = y + 1;
+  } else if (x > 0 && field[x - 1][y] == 0) {
+    position[0] = x - 1;
+    position[1] = y;
+  } else if (y > 0 && field[x][y - 1] == 0) {
+    position[0] = x;
+    position[1] = y - 1;
+  } else {
+    if (y > 0 && field[x][y - 1] == 1) {
+      position[0] = x;
+      position[1] = y - 1;
+    } else if (x < rows - 1 && field[x + 1][y] == 1) {
+      position[0] = x + 1;
+      position[1] = y;
+    } else if (y < cols - 1 && field[x][y + 1] == 1) {
+      position[0] = x;
+      position[1] = y + 1;
+    } else if (x > 0 && field[x - 1][y] == 1) {
+      position[0] = x - 1;
+      position[1] = y;
+    }
+  }
+  field[x][y] = 1;
+  ++busy;
+  --free;
+  show(x, y);
 }
