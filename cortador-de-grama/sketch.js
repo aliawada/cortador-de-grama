@@ -1,16 +1,15 @@
 var cols = 7;
 var rows = 7;
 var free;
-var busy;
 var field = new Array(cols);
 var position;
 
 function setup() {
+  frameRate(10);
   console.log('Cortador de Grama');
   createCanvas(500, 500);
 
   free = cols * rows;
-  busy = 0;
   position = new Array(2);
   position[0] = position[1] = 0;
 
@@ -30,36 +29,51 @@ function setup() {
       } else {
         field[i][j] = 0;
       }
-      show(i, j);
     }
   }
-
+  
+  field[0][0] = 0;
+  field[cols - 1][rows - 1] = 0;
+  
+  for (var i = 0; i < cols; i++) {
+    for (var j = 0; j < rows; j++) {
+      show(i, j);
+    }
+  } 
+  
+  
 }
 
 function draw() {
-  while(free >= 0) {
-    move();
+  if(free >=0){
+	setTimeout(move, 100); 
+  } else {
+	noLoop(); 
   }
-  
-  noLoop();
 }
 
 function show(i, j) {
+  
+
   if (field[i][j] == 0) { // grama não cortada
     fill(0, 255, 0, 30);
   } else if (field[i][j] == 1) { // grama cortada
     fill(0, 255, 0);
   } else if (field[i][j] == 2) { // formigueiro
     fill(222, 184, 135);
+  }	else if(field[i][j] = 3){
+	  fill(135, 46, 111)
   }
 
   rect(i * w, j * h, w, h);
 }
 
+
+
 function move() {
   var x = position[0];
   var y = position[1];
-
+  
   if (x < rows - 1 && field[x + 1][y] == 0) {
     position[0] = x + 1;
     position[1] = y;
@@ -85,10 +99,12 @@ function move() {
     } else if (x > 0 && field[x - 1][y] == 1) {
       position[0] = x - 1;
       position[1] = y;
-    }
+    } 
   }
+  field[position[0]][ position[1]]=3
+  show(position[0], position[1]);
   field[x][y] = 1;
-  ++busy;
   --free;
   show(x, y);
 }
+
